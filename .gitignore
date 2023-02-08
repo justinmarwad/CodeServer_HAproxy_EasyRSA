@@ -1,0 +1,5 @@
+.env
+data/pki
+data/coder
+*.pem
+*.crt

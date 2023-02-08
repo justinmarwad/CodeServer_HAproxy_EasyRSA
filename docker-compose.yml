@@ -1,0 +1,45 @@
+version: "3.9"
+
+services:
+  code-server:
+    image: lscr.io/linuxserver/code-server:latest
+    container_name: code-server
+    environment:
+      - PUID=1000
+      - PGID=1000
+      - TZ=America/New_York
+      - PASSWORD=${PASSWORD}
+      - SUDO_PASSWORD=${PASSWORD} 
+      - PROXY_DOMAIN=${FQDN}
+      # - HASHED_PASSWORD= #optional
+      # - SUDO_PASSWORD_HASH= #optional
+      # - DEFAULT_WORKSPACE=/config/workspace #optional
+
+    volumes:
+      - ${HOME}:/config/workspace # Home workspace 
+      - ./data/coder:/config
+    ports:
+      - 8443:8443
+    networks: 
+      - private
+    restart: always
+
+  haproxy:
+    image: haproxy:latest
+    volumes:
+      - ./data/haproxy/haproxy.cfg:/usr/local/etc/haproxy/haproxy.cfg:ro 
+      - ./data/haproxy/${FQDN}.pem:/usr/local/certificates/certificate.pem
+    ports:
+      - "80:80"
+      - "443:443"
+    depends_on:
+      - code-server
+    networks: 
+      - private
+      - public 
+    restart: always
+
+networks: 
+  private: 
+  public: 
+  
